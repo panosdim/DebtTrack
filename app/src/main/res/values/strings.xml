@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Debt Track</string>
+    <string name="new_version">New version found and is downloading on the background.</string>
 </resources>
