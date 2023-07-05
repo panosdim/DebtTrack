@@ -1,4 +1,19 @@
 <resources>
     <string name="app_name">Debt Track</string>
     <string name="new_version">New version found and is downloading on the background.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="date">Date\n</string>
+    <string name="who_owes_me">Who owes me</string>
+    <string name="comment">Comment</string>
+    <string name="amount">Amount</string>
+    <string name="delete_debt_dialog_title">Delete debt?</string>
+    <string name="delete_debt_dialog_description">Debt will be deleted permanently and will not be able to recover it.</string>
+    <string name="delete_toast">Debt deleted successfully.</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="delete">Delete</string>
+    <string name="update_toast">Debt updated successfully.</string>
+    <string name="update">Update</string>
+    <string name="create">Create</string>
 </resources>
