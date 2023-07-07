@@ -46,8 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
-import com.panosdim.debttrack.utils.CurrencyVisualTransformation
+import com.panosdim.debttrack.model.DebtDetails
 import com.panosdim.debttrack.utils.toEpochMilli
+import com.panosdim.debttrack.utils.toLocalDate
 import com.panosdim.debttrack.viewmodels.TheyOweMe
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -62,6 +63,8 @@ fun DebtSheet(
     val viewModel: TheyOweMe = viewModel()
     val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val currencyRegex =
+        "([1-9][0-9]{0,2}(,[0-9]{3})*(\\.[0-9]{0,2})?|[1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
 
     var debtName by rememberSaveable {
         debtItem?.let {
@@ -72,21 +75,21 @@ fun DebtSheet(
     }
     var debtComment by rememberSaveable {
         debtItem?.let {
-            return@rememberSaveable mutableStateOf(it.comment)
+            return@rememberSaveable mutableStateOf(it.debt.comment)
         } ?: run {
             return@rememberSaveable mutableStateOf("")
         }
     }
     var debtAmount by rememberSaveable {
         debtItem?.let {
-            return@rememberSaveable mutableStateOf(it.amount.toString())
+            return@rememberSaveable mutableStateOf(it.debt.amount.toString())
         } ?: run {
             return@rememberSaveable mutableStateOf("")
         }
     }
     val debtDate by rememberSaveable {
         debtItem?.let {
-            return@rememberSaveable mutableStateOf(LocalDate.parse(it.date))
+            return@rememberSaveable mutableStateOf(LocalDate.parse(it.debt.date))
         } ?: run {
             return@rememberSaveable mutableStateOf(LocalDate.now())
         }
@@ -187,16 +190,11 @@ fun DebtSheet(
                         )
                     },
                     isError = !isFormValid(),
-                    onValueChange = {
-                        debtAmount = if (it.startsWith("0")) {
-                            ""
-                        } else {
-                            it
+                    onValueChange = { newValue ->
+                        if (newValue.matches(Regex(currencyRegex))) {
+                            debtAmount = newValue
                         }
                     },
-                    visualTransformation = CurrencyVisualTransformation(
-                        fixedCursorAtTheEnd = true
-                    ),
                     label = { Text(stringResource(id = R.string.amount)) },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -246,24 +244,12 @@ fun DebtSheet(
                         Button(
                             enabled = isFormValid(),
                             onClick = {
-//                                maintenanceItem.name = itemName
-//                                maintenanceItem.periodicity = itemPeriodicity.toInt()
-//                                datePickerState.selectedDateMillis?.toLocalDate()?.let {
-//                                    maintenanceItem.date = it.toString()
-//                                }
-//
-//                                maintenanceItem.eventID?.let { eventId ->
-//                                    datePickerState.selectedDateMillis?.toLocalDate()?.let { date ->
-//                                        val eventDate = date.plusMonths(itemPeriodicity.toLong())
-//                                        updateEvent(context, eventId, eventDate, itemName)
-//                                    }
-//                                } ?: kotlin.run {
-//                                    datePickerState.selectedDateMillis?.toLocalDate()?.let { date ->
-//                                        val eventDate = date.plusMonths(itemPeriodicity.toLong())
-//                                        maintenanceItem.eventID =
-//                                            insertEvent(context, eventDate, itemName)
-//                                    }
-//                                }
+                                debtItem.name = debtName
+                                debtItem.debt.amount = debtAmount.toFloatOrNull() ?: 0f
+                                debtItem.debt.comment = debtComment
+                                datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                    debtItem.debt.date = it.toString()
+                                }
 
                                 viewModel.updateDebt(debtItem)
 
@@ -293,31 +279,31 @@ fun DebtSheet(
                         Button(
                             enabled = isFormValid(),
                             onClick = {
-//                                val newItem =
-//                                    datePickerState.selectedDateMillis?.toLocalDate()?.let {
-//                                        val eventDate = it.plusMonths(itemPeriodicity.toLong())
-//                                        Item(
-//                                            name = itemName,
-//                                            periodicity = itemPeriodicity.toInt(),
-//                                            date = it.toString(),
-//                                            eventID = insertEvent(context, eventDate, itemName)
-//                                        )
-//                                    }
-//
-//                                if (newItem != null) {
-//                                    viewModel.addNewItem(newItem)
-//                                    Toast.makeText(
-//                                        context, "Item Saved Successfully.",
-//                                        Toast.LENGTH_LONG
-//                                    ).show()
-//                                } else {
-//                                    Toast.makeText(
-//                                        context, "Failed to save new item.",
-//                                        Toast.LENGTH_LONG
-//                                    ).show()
-//                                }
-//
-//                                activity?.finish()
+                                val newItem =
+                                    datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                        Debt(
+                                            name = debtName,
+                                            debt = DebtDetails(
+                                                amount = debtAmount.toFloatOrNull() ?: 0f,
+                                                date = it.toString(),
+                                                comment = debtComment
+                                            )
+                                        )
+                                    }
+
+                                if (newItem != null) {
+                                    viewModel.addDebt(newItem)
+                                    Toast.makeText(
+                                        context, R.string.create_toast,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    Toast.makeText(
+                                        context, R.string.create_failed_toast,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+
                             },
                         ) {
                             Icon(

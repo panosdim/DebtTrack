@@ -7,7 +7,7 @@ import com.panosdim.debttrack.utils.TabNames
 
 class IOwe : ViewModel() {
     private val repository = Repository()
-    val debts = repository.getDebt(TabNames.IOWE)
+    val debts = repository.getDebts(TabNames.IOWE)
 
     fun addDebt(debt: Debt) {
         repository.addNewItem(TabNames.IOWE, debt)

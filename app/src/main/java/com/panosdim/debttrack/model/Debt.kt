@@ -5,9 +5,22 @@ import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
-data class Debt(
-    var id: String? = null,
+data class PersonDebts(
     var name: String = "",
+    var debts: List<DebtDetails>
+) :
+    Parcelable
+
+@Parcelize
+data class Debt(
+    var name: String = "",
+    var debt: DebtDetails
+) :
+    Parcelable
+
+@Parcelize
+data class DebtDetails(
+    var id: String? = null,
     var amount: Float = 0.0F,
     var date: String = "",
     var comment: String = ""
