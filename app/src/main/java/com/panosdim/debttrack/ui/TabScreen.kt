@@ -20,7 +20,6 @@ import com.panosdim.debttrack.utils.TabNames
 @Composable
 fun TabScreen() {
     var tabIndex by remember { mutableStateOf(0) }
-
     val tabs = enumValues<TabNames>().map { it.tabName }
 
     Column(modifier = Modifier.fillMaxWidth()) {

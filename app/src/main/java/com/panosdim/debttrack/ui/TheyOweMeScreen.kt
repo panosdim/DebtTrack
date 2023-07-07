@@ -1,5 +1,6 @@
 package com.panosdim.debttrack.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.viewmodels.TheyOweMe
 import kotlinx.coroutines.launch
 
@@ -30,7 +32,7 @@ import kotlinx.coroutines.launch
 fun TheyOweMeScreen() {
     val viewModel: TheyOweMe = viewModel()
     val debtItems =
-        viewModel.debts.collectAsStateWithLifecycle(initialValue = emptyList()).value
+        viewModel.debts.collectAsStateWithLifecycle(initialValue = emptyList())
     val scope = rememberCoroutineScope()
     val skipPartiallyExpanded by remember { mutableStateOf(true) }
     val bottomSheetState = rememberModalBottomSheetState(
@@ -55,7 +57,8 @@ fun TheyOweMeScreen() {
                 .padding(8.dp),
             contentPadding = it
         ) {
-            items(debtItems) { item ->
+            items(debtItems.value) { item ->
+                Log.d(TAG, item.toString())
                 Box(contentAlignment = Alignment.TopEnd) {
                     DebtCard(item)
                 }

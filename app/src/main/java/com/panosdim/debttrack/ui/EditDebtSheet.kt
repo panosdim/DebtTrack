@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EuroSymbol
 import androidx.compose.material.icons.filled.Save
@@ -33,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
-import com.panosdim.debttrack.model.DebtDetails
 import com.panosdim.debttrack.utils.toEpochMilli
 import com.panosdim.debttrack.utils.toLocalDate
 import com.panosdim.debttrack.viewmodels.TheyOweMe
@@ -55,8 +52,8 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DebtSheet(
-    debtItem: Debt?,
+fun EditDebtSheet(
+    debtItem: Debt,
     bottomSheetState: SheetState
 ) {
     val context = LocalContext.current
@@ -64,38 +61,7 @@ fun DebtSheet(
     val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val currencyRegex =
-        "([1-9][0-9]{0,2}(,[0-9]{3})*(\\.[0-9]{0,2})?|[1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
-
-    var debtName by rememberSaveable {
-        debtItem?.let {
-            return@rememberSaveable mutableStateOf(it.name)
-        } ?: run {
-            return@rememberSaveable mutableStateOf("")
-        }
-    }
-    var debtComment by rememberSaveable {
-        debtItem?.let {
-            return@rememberSaveable mutableStateOf(it.debt.comment)
-        } ?: run {
-            return@rememberSaveable mutableStateOf("")
-        }
-    }
-    var debtAmount by rememberSaveable {
-        debtItem?.let {
-            return@rememberSaveable mutableStateOf(it.debt.amount)
-        } ?: run {
-            return@rememberSaveable mutableStateOf("")
-        }
-    }
-    val debtDate by rememberSaveable {
-        debtItem?.let {
-            return@rememberSaveable mutableStateOf(LocalDate.parse(it.debt.date))
-        } ?: run {
-            return@rememberSaveable mutableStateOf(LocalDate.now())
-        }
-    }
-    val datePickerState =
-        rememberDatePickerState(initialSelectedDateMillis = debtDate.toEpochMilli())
+        "([1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
 
     val openDeleteDialog = remember { mutableStateOf(false) }
 
@@ -116,13 +82,12 @@ fun DebtSheet(
                 TextButton(
                     onClick = {
                         openDeleteDialog.value = false
-                        if (debtItem != null) {
-                            viewModel.removeDebt(debtItem)
-                        }
+                        viewModel.removeDebt(debtItem)
                         Toast.makeText(
                             context, R.string.delete_toast,
                             Toast.LENGTH_LONG
                         ).show()
+                        scope.launch { bottomSheetState.hide() }
                     }
                 ) {
                     Text(stringResource(id = R.string.confirm))
@@ -140,12 +105,19 @@ fun DebtSheet(
         )
     }
 
-    fun isFormValid(): Boolean {
-        return debtName.isNotBlank() && debtAmount.isNotBlank()
-    }
-
     // Sheet content
     if (bottomSheetState.isVisible) {
+        var debtName by remember { mutableStateOf(debtItem.name) }
+        var debtComment by remember { mutableStateOf(debtItem.debt.comment) }
+        var debtAmount by remember { mutableStateOf(debtItem.debt.amount) }
+        val debtDate by remember { mutableStateOf(LocalDate.parse(debtItem.debt.date)) }
+        val datePickerState =
+            rememberDatePickerState(initialSelectedDateMillis = debtDate.toEpochMilli())
+
+        fun isFormValid(): Boolean {
+            return debtName.isNotBlank() && debtAmount.isNotBlank()
+        }
+
         val windowInsets = if (edgeToEdgeEnabled)
             WindowInsets(0) else BottomSheetDefaults.windowInsets
 
@@ -222,98 +194,51 @@ fun DebtSheet(
                     label = stringResource(id = R.string.date)
                 )
 
-                if (debtItem != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { openDeleteDialog.value = true },
                     ) {
-                        OutlinedButton(
-                            onClick = { openDeleteDialog.value = true },
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.delete))
-                        }
-                        Button(
-                            enabled = isFormValid(),
-                            onClick = {
-                                debtItem.name = debtName
-                                debtItem.debt.amount = debtAmount
-                                debtItem.debt.comment = debtComment
-                                datePickerState.selectedDateMillis?.toLocalDate()?.let {
-                                    debtItem.debt.date = it.toString()
-                                }
-
-                                viewModel.updateDebt(debtItem)
-
-                                Toast.makeText(
-                                    context, R.string.update_toast,
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            },
-                        ) {
-                            Icon(
-                                Icons.Default.Save,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.update))
-                        }
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.delete))
                     }
-                } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
+                    Button(
+                        enabled = isFormValid(),
+                        onClick = {
+                            debtItem.name = debtName
+                            debtItem.debt.amount = debtAmount
+                            debtItem.debt.comment = debtComment
+                            datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                debtItem.debt.date = it.toString()
+                            }
+
+                            viewModel.updateDebt(debtItem)
+
+                            Toast.makeText(
+                                context, R.string.update_toast,
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            scope.launch { bottomSheetState.hide() }
+                        },
                     ) {
-                        Button(
-                            enabled = isFormValid(),
-                            onClick = {
-                                val newItem =
-                                    datePickerState.selectedDateMillis?.toLocalDate()?.let {
-                                        Debt(
-                                            name = debtName,
-                                            debt = DebtDetails(
-                                                amount = debtAmount,
-                                                date = it.toString(),
-                                                comment = debtComment
-                                            )
-                                        )
-                                    }
-
-                                if (newItem != null) {
-                                    viewModel.addDebt(newItem)
-                                    Toast.makeText(
-                                        context, R.string.create_toast,
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                } else {
-                                    Toast.makeText(
-                                        context, R.string.create_failed_toast,
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                            },
-                        ) {
-                            Icon(
-                                Icons.Filled.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.create))
-                        }
+                        Icon(
+                            Icons.Default.Save,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.update))
                     }
                 }
             }

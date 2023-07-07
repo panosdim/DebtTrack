@@ -21,7 +21,7 @@ data class Debt(
 @Parcelize
 data class DebtDetails(
     var id: String? = null,
-    var amount: Float = 0.0F,
+    var amount: String = "",
     var date: String = "",
     var comment: String = ""
 ) :
