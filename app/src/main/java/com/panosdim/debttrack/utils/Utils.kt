@@ -14,9 +14,11 @@ import com.panosdim.debttrack.R
 import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.model.FileMetadata
 import kotlinx.serialization.json.Json
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 var refId: Long = -1
-val currencyRegex = "([1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
+const val currencyRegex = "([1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
 
 @Suppress("DEPRECATION")
 fun checkForNewVersion(context: Context) {
@@ -80,4 +82,12 @@ private fun downloadNewVersion(context: Context, downloadUrl: Uri, version: Stri
         "DebtTrack-${version}.apk"
     )
     refId = manager.enqueue(request)
+}
+
+fun moneyFormat(obj: Any): String {
+    val symbols = DecimalFormatSymbols()
+    symbols.groupingSeparator = '.'
+    symbols.decimalSeparator = ','
+    val moneyFormat = DecimalFormat("#,##0.00 €", symbols)
+    return moneyFormat.format(obj)
 }

@@ -22,15 +22,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.PersonDebts
+import com.panosdim.debttrack.utils.moneyFormat
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DebtCard(personDebts: PersonDebts) {
+    val context = LocalContext.current
+    val resources = context.resources
     val scope = rememberCoroutineScope()
     val skipPartiallyExpanded by remember { mutableStateOf(true) }
     val bottomSheetState = rememberModalBottomSheetState(
@@ -63,7 +68,7 @@ fun DebtCard(personDebts: PersonDebts) {
                     ListItem(
                         headlineContent = { Text(debtDetails.date) },
                         supportingContent = { Text(debtDetails.comment) },
-                        trailingContent = { Text(debtDetails.amount.toString()) },
+                        trailingContent = { Text(moneyFormat(debtDetails.amount.toFloat())) },
                         modifier = Modifier.clickable {
                             debt = Debt(name = personDebts.name, debt = debtDetails)
                             scope.launch { bottomSheetState.show() }
@@ -71,9 +76,21 @@ fun DebtCard(personDebts: PersonDebts) {
                     )
                     Divider()
                 }
+
+                Text(
+                    text = resources.getString(
+                        R.string.total,
+                        moneyFormat(personDebts.debts.fold(0f) { acc, debtDetails -> acc + debtDetails.amount.toFloat() })
+                    ),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }
-    
+
     debt?.let { EditDebtSheet(debtItem = it, bottomSheetState = bottomSheetState) }
 }
