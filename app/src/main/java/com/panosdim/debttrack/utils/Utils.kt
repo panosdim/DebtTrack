@@ -13,10 +13,10 @@ import com.google.firebase.storage.ktx.storage
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.model.FileMetadata
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 var refId: Long = -1
+val currencyRegex = "([1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
 
 @Suppress("DEPRECATION")
 fun checkForNewVersion(context: Context) {

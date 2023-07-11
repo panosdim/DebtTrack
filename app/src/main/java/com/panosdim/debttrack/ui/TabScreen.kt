@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.panosdim.debttrack.selectedTab
 import com.panosdim.debttrack.utils.TabNames
 
 @Composable
@@ -27,7 +28,16 @@ fun TabScreen() {
             tabs.forEachIndexed { index, title ->
                 Tab(text = { Text(title) },
                     selected = tabIndex == index,
-                    onClick = { tabIndex = index },
+                    onClick = {
+                        tabIndex = index
+                        selectedTab = when (tabIndex) {
+                            0 -> TabNames.THEY_OWE_ME
+                            1 -> TabNames.I_OWE
+                            else -> {
+                                TabNames.THEY_OWE_ME
+                            }
+                        }
+                    },
                     icon = {
                         when (index) {
                             0 -> Icon(

@@ -8,8 +8,8 @@ import com.panosdim.debttrack.database
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.DebtDetails
 import com.panosdim.debttrack.model.PersonDebts
+import com.panosdim.debttrack.selectedTab
 import com.panosdim.debttrack.user
-import com.panosdim.debttrack.utils.TabNames
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -17,9 +17,10 @@ import kotlinx.coroutines.flow.callbackFlow
 
 
 class Repository {
-    fun getDebts(tab: TabNames): Flow<List<PersonDebts>> {
+    fun getDebts(): Flow<List<PersonDebts>> {
         return callbackFlow {
-            val debtRef = user?.let { database.getReference(it.uid).child(tab.getFirebasePath()) }
+            val debtRef =
+                user?.let { database.getReference(it.uid).child(selectedTab.getFirebasePath()) }
 
             val listener =
                 debtRef?.addValueEventListener(object : ValueEventListener {
@@ -58,31 +59,33 @@ class Repository {
         }
     }
 
-    fun deleteItem(tab: TabNames, item: Debt) {
+    fun deleteItem(item: Debt) {
         val debtRef = user?.let {
             item.debt.id?.let { id ->
-                database.getReference(it.uid).child(tab.getFirebasePath()).child(item.name).child(
-                    id
-                )
+                database.getReference(it.uid).child(selectedTab.getFirebasePath()).child(item.name)
+                    .child(
+                        id
+                    )
             }
         }
         debtRef?.removeValue()
     }
 
-    fun addNewItem(tab: TabNames, item: Debt) {
+    fun addNewItem(item: Debt) {
         val debtRef = user?.let {
-            database.getReference(it.uid).child(tab.getFirebasePath()).child(item.name)
+            database.getReference(it.uid).child(selectedTab.getFirebasePath()).child(item.name)
         }
 
         debtRef?.push()?.setValue(item.debt)
     }
 
-    fun updateItem(tab: TabNames, item: Debt) {
+    fun updateItem(item: Debt) {
         val debtRef = user?.let {
             item.debt.id?.let { id ->
-                database.getReference(it.uid).child(tab.getFirebasePath()).child(item.name).child(
-                    id
-                )
+                database.getReference(it.uid).child(selectedTab.getFirebasePath()).child(item.name)
+                    .child(
+                        id
+                    )
             }
         }
 

@@ -5,10 +5,10 @@ interface IGetFirebasePath {
 }
 
 enum class TabNames(val tabName: String) : IGetFirebasePath {
-    THEYOWEME("They Owe Me") {
+    THEY_OWE_ME("They Owe Me") {
         override fun getFirebasePath() = "TheyOweMe"
     },
-    IOWE("I Owe") {
+    I_OWE("I Owe") {
         override fun getFirebasePath() = "IOwe"
     },
 }

@@ -11,21 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EuroSymbol
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
+import com.panosdim.debttrack.model.DebtDetails
 import com.panosdim.debttrack.utils.currencyRegex
 import com.panosdim.debttrack.utils.toEpochMilli
 import com.panosdim.debttrack.utils.toLocalDate
@@ -53,8 +50,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDebtSheet(
-    debtItem: Debt,
+fun AddDebtSheet(
     bottomSheetState: SheetState
 ) {
     val context = LocalContext.current
@@ -62,54 +58,12 @@ fun EditDebtSheet(
     val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val openDeleteDialog = remember { mutableStateOf(false) }
-
-    if (openDeleteDialog.value) {
-        AlertDialog(
-            onDismissRequest = {
-                openDeleteDialog.value = false
-            },
-            title = {
-                Text(text = stringResource(id = R.string.delete_debt_dialog_title))
-            },
-            text = {
-                Text(
-                    stringResource(id = R.string.delete_debt_dialog_description)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDeleteDialog.value = false
-                        viewModel.removeDebt(debtItem)
-                        Toast.makeText(
-                            context, R.string.delete_toast,
-                            Toast.LENGTH_LONG
-                        ).show()
-                        scope.launch { bottomSheetState.hide() }
-                    }
-                ) {
-                    Text(stringResource(id = R.string.confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        openDeleteDialog.value = false
-                    }
-                ) {
-                    Text(stringResource(id = R.string.dismiss))
-                }
-            }
-        )
-    }
-
     // Sheet content
     if (bottomSheetState.isVisible) {
-        var debtName by remember { mutableStateOf(debtItem.name) }
-        var debtComment by remember { mutableStateOf(debtItem.debt.comment) }
-        var debtAmount by remember { mutableStateOf(debtItem.debt.amount) }
-        val debtDate by remember { mutableStateOf(LocalDate.parse(debtItem.debt.date)) }
+        var debtName by remember { mutableStateOf("") }
+        var debtComment by remember { mutableStateOf("") }
+        var debtAmount by remember { mutableStateOf("") }
+        val debtDate by remember { mutableStateOf(LocalDate.now()) }
         val datePickerState =
             rememberDatePickerState(initialSelectedDateMillis = debtDate.toEpochMilli())
 
@@ -141,7 +95,7 @@ fun EditDebtSheet(
                     singleLine = true,
                     isError = !isFormValid(),
                     onValueChange = { debtName = it },
-                    label = { Text(stringResource(id = R.string.who_owes_me)) },
+                    label = { Text(stringResource(id = R.string.to_whom_do_i_owe)) },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth()
@@ -195,49 +149,42 @@ fun EditDebtSheet(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { openDeleteDialog.value = true },
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(stringResource(id = R.string.delete))
-                    }
                     Button(
                         enabled = isFormValid(),
                         onClick = {
-                            debtItem.name = debtName
-                            debtItem.debt.amount = debtAmount
-                            debtItem.debt.comment = debtComment
+
                             datePickerState.selectedDateMillis?.toLocalDate()?.let {
-                                debtItem.debt.date = it.toString()
+                                val newItem = Debt(
+                                    name = debtName,
+                                    debt = DebtDetails(
+                                        amount = debtAmount,
+                                        date = it.toString(),
+                                        comment = debtComment
+                                    )
+                                )
+
+                                viewModel.addDebt(newItem)
+                                Toast.makeText(
+                                    context, R.string.create_toast,
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                scope.launch { bottomSheetState.hide() }
                             }
-
-                            viewModel.updateDebt(debtItem)
-
-                            Toast.makeText(
-                                context, R.string.update_toast,
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            scope.launch { bottomSheetState.hide() }
                         },
                     ) {
                         Icon(
-                            Icons.Default.Save,
+                            Icons.Filled.Add,
                             contentDescription = null,
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(stringResource(id = R.string.update))
+                        Text(stringResource(id = R.string.create))
                     }
                 }
             }

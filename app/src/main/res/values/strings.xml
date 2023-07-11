@@ -17,5 +17,7 @@
     <string name="update">Update</string>
     <string name="create">Create</string>
     <string name="create_toast">Debt created successfully</string>
-    <string name="create_failed_toast">Failed to create debt</string>
+    <string name="to_whom_do_i_owe">To whom do i owe</string>
+    <string name="add_debt">Add Debt</string>
+    <string name="empty_list">Empty List</string>
 </resources>
