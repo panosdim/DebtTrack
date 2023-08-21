@@ -160,7 +160,7 @@ fun AddDebtSheet(
 
                             datePickerState.selectedDateMillis?.toLocalDate()?.let {
                                 val newItem = Debt(
-                                    name = debtName,
+                                    name = debtName.trim(),
                                     debt = DebtDetails(
                                         amount = debtAmount,
                                         date = it.toString(),

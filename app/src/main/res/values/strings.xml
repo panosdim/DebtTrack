@@ -21,4 +21,6 @@
     <string name="add_debt">Add Debt</string>
     <string name="empty_list">Empty List</string>
     <string name="total">Total %1$s</string>
+    <string name="not_owe_anything">You don\'t owe anything</string>
+    <string name="noone_owes_you">No one owes you</string>
 </resources>

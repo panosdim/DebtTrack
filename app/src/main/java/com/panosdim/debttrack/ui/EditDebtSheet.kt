@@ -214,7 +214,7 @@ fun EditDebtSheet(
                     Button(
                         enabled = isFormValid(),
                         onClick = {
-                            debtItem.name = debtName
+                            debtItem.name = debtName.trim()
                             debtItem.debt.amount = debtAmount
                             debtItem.debt.comment = debtComment
                             datePickerState.selectedDateMillis?.toLocalDate()?.let {

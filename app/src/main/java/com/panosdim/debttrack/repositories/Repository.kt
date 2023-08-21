@@ -8,6 +8,7 @@ import com.panosdim.debttrack.database
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.DebtDetails
 import com.panosdim.debttrack.model.PersonDebts
+import com.panosdim.debttrack.model.Response
 import com.panosdim.debttrack.selectedTab
 import com.panosdim.debttrack.user
 import kotlinx.coroutines.cancel
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.callbackFlow
 
 
 class Repository {
-    fun getDebts(): Flow<List<PersonDebts>> {
+    fun getDebts(): Flow<Response<List<PersonDebts>>> {
         return callbackFlow {
             val debtRef =
                 user?.let { database.getReference(it.uid).child(selectedTab.getFirebasePath()) }
@@ -25,6 +26,7 @@ class Repository {
             val listener =
                 debtRef?.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
+                        trySend(Response.Loading)
                         val items = mutableStateListOf<PersonDebts>()
                         snapshot.children.forEach { dataSnapshot ->
                             val item = PersonDebts()
@@ -42,10 +44,11 @@ class Repository {
                             items.add(item)
                         }
                         // Emit the user data to the flow
-                        trySend(items)
+                        trySend(Response.Success(items))
                     }
 
                     override fun onCancelled(error: DatabaseError) {
+                        trySend(Response.Error(error.message))
                         cancel()
                     }
 

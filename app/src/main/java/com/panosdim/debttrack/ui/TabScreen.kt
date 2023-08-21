@@ -1,7 +1,10 @@
 package com.panosdim.debttrack.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Savings
@@ -10,33 +13,26 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.panosdim.debttrack.selectedTab
 import com.panosdim.debttrack.utils.TabNames
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabScreen() {
-    var tabIndex by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
     val tabs = enumValues<TabNames>().map { it.tabName }
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        TabRow(selectedTabIndex = tabIndex) {
+        TabRow(selectedTabIndex = pagerState.currentPage) {
             tabs.forEachIndexed { index, title ->
                 Tab(text = { Text(title) },
-                    selected = tabIndex == index,
+                    selected = pagerState.currentPage == index,
                     onClick = {
-                        tabIndex = index
-                        selectedTab = when (tabIndex) {
-                            0 -> TabNames.THEY_OWE_ME
-                            1 -> TabNames.I_OWE
-                            else -> {
-                                TabNames.THEY_OWE_ME
-                            }
-                        }
+                        scope.launch { pagerState.animateScrollToPage(index) }
                     },
                     icon = {
                         when (index) {
@@ -54,9 +50,18 @@ fun TabScreen() {
                 )
             }
         }
-        when (tabIndex) {
-            0 -> TheyOweMeScreen()
-            1 -> IOweScreen()
+        HorizontalPager(state = pagerState) { page ->
+            when (page) {
+                0 -> {
+                    selectedTab = TabNames.THEY_OWE_ME
+                    TheyOweMeScreen()
+                }
+
+                1 -> {
+                    selectedTab = TabNames.I_OWE
+                    IOweScreen()
+                }
+            }
         }
     }
 }
