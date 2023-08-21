@@ -133,12 +133,12 @@ fun TheyOweMeScreen() {
                         ) {
                             Icon(
                                 Icons.Default.Info,
-                                contentDescription = stringResource(id = R.string.noone_owes_you),
+                                contentDescription = stringResource(id = R.string.no_one_owes_you),
                                 modifier = Modifier
 
                             )
                             Text(
-                                text = stringResource(id = R.string.noone_owes_you)
+                                text = stringResource(id = R.string.no_one_owes_you)
                             )
                         }
                     }
