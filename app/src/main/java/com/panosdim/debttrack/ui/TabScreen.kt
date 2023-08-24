@@ -26,6 +26,11 @@ fun TabScreen() {
     val tabs = enumValues<TabNames>().map { it.tabName }
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
+    when (pagerState.currentPage) {
+        0 -> selectedTab = TabNames.THEY_OWE_ME
+        1 -> selectedTab = TabNames.I_OWE
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         TabRow(selectedTabIndex = pagerState.currentPage) {
             tabs.forEachIndexed { index, title ->
@@ -52,15 +57,8 @@ fun TabScreen() {
         }
         HorizontalPager(state = pagerState) { page ->
             when (page) {
-                0 -> {
-                    selectedTab = TabNames.THEY_OWE_ME
-                    TheyOweMeScreen()
-                }
-
-                1 -> {
-                    selectedTab = TabNames.I_OWE
-                    IOweScreen()
-                }
+                0 -> TheyOweMeScreen()
+                1 -> IOweScreen()
             }
         }
     }
