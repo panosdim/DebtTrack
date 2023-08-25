@@ -1,11 +1,9 @@
 package com.panosdim.debttrack.repositories
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.database
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.DebtDetails
@@ -28,7 +26,6 @@ class Repository {
             val listener =
                 debtRef?.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        Log.d(TAG, "Fetching Data")
                         trySend(Response.Loading)
                         val items = mutableStateListOf<PersonDebts>()
                         snapshot.children.forEach { dataSnapshot ->
