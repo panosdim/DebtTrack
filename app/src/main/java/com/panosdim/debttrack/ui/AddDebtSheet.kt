@@ -24,6 +24,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.DebtDetails
+import com.panosdim.debttrack.selectedTab
+import com.panosdim.debttrack.utils.TabNames
 import com.panosdim.debttrack.utils.currencyRegex
 import com.panosdim.debttrack.utils.toEpochMilli
 import com.panosdim.debttrack.utils.toLocalDate
@@ -66,6 +69,15 @@ fun AddDebtSheet(
         val debtDate by remember { mutableStateOf(LocalDate.now()) }
         val datePickerState =
             rememberDatePickerState(initialSelectedDateMillis = debtDate.toEpochMilli())
+
+        val title by remember {
+            derivedStateOf {
+                when (selectedTab) {
+                    TabNames.I_OWE -> R.string.to_whom_do_i_owe
+                    TabNames.THEY_OWE_ME -> R.string.who_owes_me
+                }
+            }
+        }
 
         fun isFormValid(): Boolean {
             return debtName.isNotBlank() && debtAmount.isNotBlank()
@@ -95,7 +107,7 @@ fun AddDebtSheet(
                     singleLine = true,
                     isError = !isFormValid(),
                     onValueChange = { debtName = it },
-                    label = { Text(stringResource(id = R.string.to_whom_do_i_owe)) },
+                    label = { Text(stringResource(id = title)) },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth()

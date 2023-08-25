@@ -49,7 +49,7 @@ fun IOweScreen() {
     val viewModel: DebtsViewModel = viewModel()
     var debtItems by remember { mutableStateOf(emptyList<PersonDebts>()) }
     val debtItemsResponse =
-        viewModel.getDebts().collectAsStateWithLifecycle(initialValue = Response.Loading)
+        viewModel.iOweDebts.collectAsStateWithLifecycle(initialValue = Response.Loading)
     val scope = rememberCoroutineScope()
     val skipPartiallyExpanded by remember { mutableStateOf(true) }
     val bottomSheetState = rememberModalBottomSheetState(

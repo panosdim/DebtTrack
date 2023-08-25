@@ -29,6 +29,8 @@ import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.PersonDebts
 import com.panosdim.debttrack.utils.moneyFormat
+import com.panosdim.debttrack.utils.toFormattedString
+import com.panosdim.debttrack.utils.toLocalDate
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,9 +68,25 @@ fun DebtCard(personDebts: PersonDebts) {
                 )
                 personDebts.debts.forEach { debtDetails ->
                     ListItem(
-                        headlineContent = { Text(debtDetails.date) },
-                        supportingContent = { Text(debtDetails.comment) },
-                        trailingContent = { Text(moneyFormat(debtDetails.amount.toFloat())) },
+                        headlineContent = {
+                            Text(
+                                text = debtDetails.date.toLocalDate().toFormattedString(),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        },
+                        supportingContent = {
+                            if (debtDetails.comment.isNotBlank()) {
+                                Text(debtDetails.comment)
+                            }
+                        },
+                        trailingContent = {
+                            Text(
+                                text = moneyFormat(
+                                    debtDetails.amount.toFloat()
+                                ),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        },
                         modifier = Modifier.clickable {
                             debt = Debt(name = personDebts.name, debt = debtDetails)
                             scope.launch { bottomSheetState.show() }
