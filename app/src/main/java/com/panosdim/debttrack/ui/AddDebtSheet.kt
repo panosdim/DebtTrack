@@ -54,7 +54,7 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDebtSheet(
-    bottomSheetState: SheetState
+    bottomSheetState: SheetState, personName: String? = null
 ) {
     val context = LocalContext.current
     val viewModel: DebtsViewModel = viewModel()
@@ -63,7 +63,7 @@ fun AddDebtSheet(
 
     // Sheet content
     if (bottomSheetState.isVisible) {
-        var debtName by remember { mutableStateOf("") }
+        var debtName by remember { mutableStateOf(personName ?: "") }
         var debtComment by remember { mutableStateOf("") }
         var debtAmount by remember { mutableStateOf("") }
         val debtDate by remember { mutableStateOf(LocalDate.now()) }
@@ -83,8 +83,8 @@ fun AddDebtSheet(
             return debtName.isNotBlank() && debtAmount.isNotBlank()
         }
 
-        val windowInsets = if (edgeToEdgeEnabled)
-            WindowInsets(0) else BottomSheetDefaults.windowInsets
+        val windowInsets =
+            if (edgeToEdgeEnabled) WindowInsets(0) else BottomSheetDefaults.windowInsets
 
         ModalBottomSheet(
             onDismissRequest = { scope.launch { bottomSheetState.hide() } },
@@ -97,11 +97,11 @@ fun AddDebtSheet(
                     .padding(8.dp),
             ) {
                 OutlinedTextField(
+                    enabled = personName == null,
                     value = debtName,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
-                        capitalization =
-                        KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Next
                     ),
                     singleLine = true,
@@ -116,14 +116,12 @@ fun AddDebtSheet(
                 OutlinedTextField(
                     value = debtAmount,
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
                     ),
                     singleLine = true,
                     trailingIcon = {
                         Icon(
-                            imageVector = Icons.Default.EuroSymbol,
-                            contentDescription = "Euro Icon"
+                            imageVector = Icons.Default.EuroSymbol, contentDescription = "Euro Icon"
                         )
                     },
                     isError = !isFormValid(),
@@ -142,8 +140,7 @@ fun AddDebtSheet(
                     value = debtComment,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
-                        capitalization =
-                        KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Done
                     ),
                     singleLine = true,
@@ -155,8 +152,7 @@ fun AddDebtSheet(
                 )
 
                 OutlinedDatePicker(
-                    state = datePickerState,
-                    label = stringResource(id = R.string.date)
+                    state = datePickerState, label = stringResource(id = R.string.date)
                 )
 
                 Row(
@@ -172,8 +168,7 @@ fun AddDebtSheet(
 
                             datePickerState.selectedDateMillis?.toLocalDate()?.let {
                                 val newItem = Debt(
-                                    name = debtName.trim(),
-                                    debt = DebtDetails(
+                                    name = debtName.trim(), debt = DebtDetails(
                                         amount = debtAmount,
                                         date = it.toString(),
                                         comment = debtComment
@@ -182,8 +177,7 @@ fun AddDebtSheet(
 
                                 viewModel.addDebt(newItem)
                                 Toast.makeText(
-                                    context, R.string.create_toast,
-                                    Toast.LENGTH_LONG
+                                    context, R.string.create_toast, Toast.LENGTH_LONG
                                 ).show()
 
                                 scope.launch { bottomSheetState.hide() }
