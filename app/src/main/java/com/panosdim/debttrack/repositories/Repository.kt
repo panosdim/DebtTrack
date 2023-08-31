@@ -95,4 +95,12 @@ class Repository {
         debtRef?.setValue(item.debt)
         debtRef?.child("id")?.removeValue()
     }
+
+    fun deletePersonDebts(personDebts: PersonDebts) {
+        val debtRef = user?.let {
+            database.getReference(it.uid).child(selectedTab.getFirebasePath())
+                .child(personDebts.name)
+        }
+        debtRef?.removeValue()
+    }
 }

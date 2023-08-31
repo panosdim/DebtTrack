@@ -1,6 +1,8 @@
 package com.panosdim.debttrack.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -17,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,12 +39,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.model.Debt
 import com.panosdim.debttrack.model.PersonDebts
 import com.panosdim.debttrack.utils.moneyFormat
 import com.panosdim.debttrack.utils.toFormattedString
 import com.panosdim.debttrack.utils.toLocalDate
+import com.panosdim.debttrack.viewmodels.DebtsViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +54,7 @@ import kotlinx.coroutines.launch
 fun DebtCard(personDebts: PersonDebts) {
     val context = LocalContext.current
     val resources = context.resources
+    val viewModel: DebtsViewModel = viewModel()
     val scope = rememberCoroutineScope()
     val skipPartiallyExpanded by remember { mutableStateOf(true) }
     val bottomSheetState = rememberModalBottomSheetState(
@@ -55,6 +64,48 @@ fun DebtCard(personDebts: PersonDebts) {
     val addExtraDebtBottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
+
+    val openDeleteDialog = remember { mutableStateOf(false) }
+
+    if (openDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDeleteDialog.value = false
+            },
+            title = {
+                Text(text = stringResource(id = R.string.delete_person_debts_dialog_title))
+            },
+            text = {
+                Text(
+                    stringResource(id = R.string.delete_person_debts_dialog_description)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDeleteDialog.value = false
+                        viewModel.removePersonDebts(personDebts)
+                        Toast.makeText(
+                            context, R.string.person_delete_toast,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        scope.launch { bottomSheetState.hide() }
+                    }
+                ) {
+                    Text(stringResource(id = R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDeleteDialog.value = false
+                    }
+                ) {
+                    Text(stringResource(id = R.string.dismiss))
+                }
+            }
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -101,21 +152,39 @@ fun DebtCard(personDebts: PersonDebts) {
                     Divider()
                 }
 
-                TextButton(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
-                    onClick = {
-                        scope.launch { addExtraDebtBottomSheetState.show() }
-                    },
                 ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
-                    )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(id = R.string.add_extra_debt))
+                    Button(
+                        onClick = {
+                            scope.launch { addExtraDebtBottomSheetState.show() }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.add_person_debt))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch { openDeleteDialog.value = true }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.delete_all_person_debts))
+                    }
                 }
 
                 Text(

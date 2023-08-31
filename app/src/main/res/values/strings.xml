@@ -18,10 +18,14 @@
     <string name="create">Create</string>
     <string name="create_toast">Debt created successfully</string>
     <string name="to_whom_do_i_owe">To whom do i owe</string>
-    <string name="add_debt">Add Debt</string>
+    <string name="add_debt">Add New Debt</string>
     <string name="empty_list">Empty List</string>
     <string name="total">Total %1$s</string>
     <string name="not_owe_anything">You don\'t owe anything</string>
     <string name="no_one_owes_you">No one owes you</string>
-    <string name="add_extra_debt">Add New Debt</string>
+    <string name="add_person_debt">Add Debt</string>
+    <string name="delete_all_person_debts">Delete all</string>
+    <string name="delete_person_debts_dialog_title">Delete person debts?</string>
+    <string name="delete_person_debts_dialog_description">Do you want to delete all person debts?</string>
+    <string name="person_delete_toast">All person debts deleted successfully</string>
 </resources>

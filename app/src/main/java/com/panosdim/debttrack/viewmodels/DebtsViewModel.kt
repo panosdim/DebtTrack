@@ -2,6 +2,7 @@ package com.panosdim.debttrack.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.panosdim.debttrack.model.Debt
+import com.panosdim.debttrack.model.PersonDebts
 import com.panosdim.debttrack.repositories.Repository
 import com.panosdim.debttrack.utils.TabNames
 
@@ -21,5 +22,9 @@ class DebtsViewModel : ViewModel() {
 
     fun removeDebt(debt: Debt) {
         repository.deleteItem(debt)
+    }
+
+    fun removePersonDebts(personDebts: PersonDebts) {
+        repository.deletePersonDebts(personDebts)
     }
 }
