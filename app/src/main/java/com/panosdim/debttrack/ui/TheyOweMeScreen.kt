@@ -110,38 +110,36 @@ fun TheyOweMeScreen() {
             }
 
         ) {
-            LazyColumn(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                contentPadding = it,
-                state = listState
-            ) {
-                if (debtItems.isNotEmpty()) {
+            if (debtItems.isNotEmpty()) {
+                LazyColumn(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    contentPadding = it,
+                    state = listState
+                ) {
                     items(debtItems) { item ->
                         Box(contentAlignment = Alignment.TopEnd) {
                             DebtCard(item)
                         }
                     }
                     item { Spacer(modifier = Modifier.padding(bottom = 64.dp)) }
-                } else {
-                    item {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Info,
-                                contentDescription = stringResource(id = R.string.no_one_owes_you),
-                                modifier = Modifier
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = stringResource(id = R.string.no_one_owes_you),
+                        modifier = Modifier
 
-                            )
-                            Text(
-                                text = stringResource(id = R.string.no_one_owes_you)
-                            )
-                        }
-                    }
+                    )
+                    Text(
+                        text = stringResource(id = R.string.no_one_owes_you)
+                    )
                 }
             }
             AddDebtSheet(bottomSheetState = bottomSheetState)
