@@ -1,10 +1,12 @@
 package com.panosdim.debttrack.activities
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,11 +21,16 @@ import com.panosdim.debttrack.ui.TabScreen
 import com.panosdim.debttrack.ui.theme.DebtTrackTheme
 import com.panosdim.debttrack.utils.checkForNewVersion
 import com.panosdim.debttrack.utils.refId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class Main : ComponentActivity() {
     private lateinit var manager: DownloadManager
     private lateinit var onComplete: BroadcastReceiver
+    private val scope = CoroutineScope(Dispatchers.IO)
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,12 +50,22 @@ class Main : ComponentActivity() {
 
             }
         }
-        registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(
+                onComplete,
+                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                RECEIVER_EXPORTED
+            )
+        } else {
+            registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        }
 
         FirebaseApp.initializeApp(this)
 
         // Check for new version
-        checkForNewVersion(this)
+        scope.launch {
+            checkForNewVersion(this@Main)
+        }
 
         setContent {
             DebtTrackTheme {
