@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EuroSymbol
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,7 +56,6 @@ fun AddDebtSheet(
 ) {
     val context = LocalContext.current
     val viewModel: DebtsViewModel = viewModel()
-    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     // Sheet content
@@ -83,13 +80,9 @@ fun AddDebtSheet(
             return debtName.isNotBlank() && debtAmount.isNotBlank()
         }
 
-        val windowInsets =
-            if (edgeToEdgeEnabled) WindowInsets(0) else BottomSheetDefaults.windowInsets
-
         ModalBottomSheet(
             onDismissRequest = { scope.launch { bottomSheetState.hide() } },
             sheetState = bottomSheetState,
-            windowInsets = windowInsets
         ) {
             Column(
                 modifier = Modifier

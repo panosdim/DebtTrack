@@ -8,8 +8,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.FirebaseApp
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.ui.TabScreen
 import com.panosdim.debttrack.ui.theme.DebtTrackTheme
 import com.panosdim.debttrack.utils.checkForNewVersion
@@ -28,14 +33,16 @@ import kotlinx.coroutines.launch
 class Main : ComponentActivity() {
     private lateinit var manager: DownloadManager
     private lateinit var onComplete: BroadcastReceiver
+    private lateinit var remoteConfig: FirebaseRemoteConfig
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         // Handle new version installation after the download of APK file.
-        manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        manager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         onComplete = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val referenceId = intent!!.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
@@ -62,10 +69,25 @@ class Main : ComponentActivity() {
 
         FirebaseApp.initializeApp(this)
 
-        // Check for new version
-        scope.launch {
-            checkForNewVersion(this@Main)
-        }
+        remoteConfig = FirebaseRemoteConfig.getInstance()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(2592000) // Fetch at least every 30 days
+            .build()
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val updateUrl = remoteConfig.getString("UPDATE_URL")
+                    // Check for new version
+                    scope.launch {
+                        checkForNewVersion(this@Main, updateUrl)
+                    }
+                } else {
+                    // Handle fetch failure (e.g., log the error)
+                    Log.e(TAG, "Error fetching remote config", task.exception)
+                }
+            }
 
         setContent {
             DebtTrackTheme {

@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.net.toUri
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.TAG
 import com.panosdim.debttrack.model.FileMetadata
@@ -22,15 +23,16 @@ import javax.net.ssl.HttpsURLConnection
 
 var refId: Long = -1
 const val currencyRegex = "([1-9][0-9]*(\\.[0-9]{0,2})?|0(\\.[0-9]{0,2})?|(\\.[0-9]{1,2})?)"
+private val json = Json { ignoreUnknownKeys = true }
 
-fun checkForNewVersion(context: Context) {
+
+fun checkForNewVersion(context: Context, updateUrl: String) {
     val metadataFileName = "output-metadata.json"
     val apkFileName = "app-release.apk"
-    val backendUrl = "https://apps.dsw.mywire.org/debt-track/"
     val url: URL
 
     try {
-        url = URL(backendUrl + metadataFileName)
+        url = URL(updateUrl + metadataFileName)
         val conn = url.openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = true
         conn.requestMethod = "GET"
@@ -42,7 +44,7 @@ fun checkForNewVersion(context: Context) {
 
         if (responseCode == HttpsURLConnection.HTTP_OK) {
             val data = conn.inputStream.bufferedReader().use(BufferedReader::readText)
-            val fileMetadata = Json.decodeFromString<FileMetadata>(data)
+            val fileMetadata = json.decodeFromString<FileMetadata>(data)
             val version = fileMetadata.elements[0].versionCode
 
             val appVersion = PackageInfoCompat.getLongVersionCode(
@@ -64,7 +66,7 @@ fun checkForNewVersion(context: Context) {
                 val versionName = fileMetadata.elements[0].versionName
 
                 // Download APK file
-                val apkUri = Uri.parse(backendUrl + apkFileName)
+                val apkUri = (updateUrl + apkFileName).toUri()
                 downloadNewVersion(context, apkUri, versionName)
             }
         }

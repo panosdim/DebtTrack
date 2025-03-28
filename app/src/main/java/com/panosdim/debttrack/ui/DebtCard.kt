@@ -17,10 +17,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -128,28 +129,36 @@ fun DebtCard(personDebts: PersonDebts) {
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                personDebts.debts.forEach { debtDetails ->
-                    ListItem(headlineContent = {
-                        Text(
-                            text = debtDetails.date.toLocalDate().toFormattedString(),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                    }, supportingContent = {
-                        if (debtDetails.comment.isNotBlank()) {
-                            Text(debtDetails.comment)
-                        }
-                    }, trailingContent = {
-                        Text(
-                            text = moneyFormat(
-                                debtDetails.amount.toFloat()
-                            ),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                    }, modifier = Modifier.clickable {
-                        debt = Debt(name = personDebts.name, debt = debtDetails)
-                        scope.launch { bottomSheetState.show() }
-                    })
-                    Divider()
+                personDebts.debts.forEachIndexed { index, debtDetails ->
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = debtDetails.date.toLocalDate().toFormattedString(),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        },
+                        supportingContent = {
+                            if (debtDetails.comment.isNotBlank()) {
+                                Text(debtDetails.comment)
+                            }
+                        },
+                        trailingContent = {
+                            Text(
+                                text = moneyFormat(
+                                    debtDetails.amount.toFloat()
+                                ),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            debt = Debt(name = personDebts.name, debt = debtDetails)
+                            scope.launch { bottomSheetState.show() }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+                    )
+                    if (index < personDebts.debts.size - 1) {
+                        HorizontalDivider()
+                    }
                 }
 
                 Row(

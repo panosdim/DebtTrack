@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EuroSymbol
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -62,7 +60,6 @@ fun EditDebtSheet(
 ) {
     val context = LocalContext.current
     val viewModel: DebtsViewModel = viewModel()
-    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     val openDeleteDialog = remember { mutableStateOf(false) }
@@ -129,13 +126,9 @@ fun EditDebtSheet(
             return debtName.isNotBlank() && debtAmount.isNotBlank()
         }
 
-        val windowInsets = if (edgeToEdgeEnabled)
-            WindowInsets(0) else BottomSheetDefaults.windowInsets
-
         ModalBottomSheet(
             onDismissRequest = { scope.launch { bottomSheetState.hide() } },
             sheetState = bottomSheetState,
-            windowInsets = windowInsets
         ) {
             Column(
                 modifier = Modifier
@@ -148,7 +141,7 @@ fun EditDebtSheet(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         capitalization =
-                        KeyboardCapitalization.Words,
+                            KeyboardCapitalization.Words,
                         imeAction = ImeAction.Next
                     ),
                     singleLine = true,
@@ -190,7 +183,7 @@ fun EditDebtSheet(
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         capitalization =
-                        KeyboardCapitalization.Words,
+                            KeyboardCapitalization.Words,
                         imeAction = ImeAction.Done
                     ),
                     singleLine = true,
