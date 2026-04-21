@@ -54,7 +54,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun DebtCard(personDebts: PersonDebts) {
     val context = LocalContext.current
-    val resources = context.resources
     val viewModel: DebtsViewModel = viewModel()
     val scope = rememberCoroutineScope()
     val skipPartiallyExpanded by remember { mutableStateOf(true) }
@@ -197,8 +196,8 @@ fun DebtCard(personDebts: PersonDebts) {
                 }
 
                 Text(
-                    text = resources.getString(
-                        R.string.total,
+                    text = stringResource(
+                        id = R.string.total,
                         moneyFormat(personDebts.debts.fold(0f) { acc, debtDetails -> acc + debtDetails.amount.toFloat() })
                     ),
                     textAlign = TextAlign.Center,

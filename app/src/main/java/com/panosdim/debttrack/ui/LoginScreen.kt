@@ -17,9 +17,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -47,8 +47,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.panosdim.debttrack.R
 import com.panosdim.debttrack.activities.LoginActivity
 import com.panosdim.debttrack.activities.Main
@@ -73,10 +73,7 @@ fun LoginScreen(activity: LoginActivity) {
     }
 
     fun isPasswordValid(): Boolean {
-        if (password.isEmpty() || password.length < 5) {
-            return false
-        }
-        return true
+        return !(password.isEmpty() || password.length < 5)
     }
 
     fun isFormValid(): Boolean {
@@ -262,7 +259,7 @@ fun LoginScreen(activity: LoginActivity) {
                     onClick = { login() },
                 ) {
                     Icon(
-                        Icons.Outlined.Login,
+                        Icons.AutoMirrored.Outlined.Login,
                         contentDescription = null,
                         modifier = Modifier.size(ButtonDefaults.IconSize)
                     )

@@ -19,7 +19,6 @@
     <string name="create_toast">Debt created successfully</string>
     <string name="to_whom_do_i_owe">To whom do i owe</string>
     <string name="add_debt">Add New Debt</string>
-    <string name="empty_list">Empty List</string>
     <string name="total">Total %1$s</string>
     <string name="not_owe_anything">You don\'t owe anything</string>
     <string name="no_one_owes_you">No one owes you</string>
